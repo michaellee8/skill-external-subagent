@@ -38,7 +38,7 @@ This skill teaches agents how to invoke other coding agent CLIs (Claude Code, Co
 
 ## Core Flow
 
-1. **Detect available CLIs.** Run `which claude codex gemini` to check which agent CLIs are installed. If none are found, inform the user and stop.
+1. **Detect available CLIs.** Run `which claude codex gemini` (or check each individually) to see which agent CLIs are installed. Each line of output corresponds to a found binary. If none are found, inform the user and stop.
 
 2. **Select the tool.** If the user specified which agent to use, use that one. If they said something generic like "get a second opinion", suggest from the available CLIs and confirm with the user, or pick one if only one is available.
 
@@ -90,9 +90,7 @@ If the parent agent (you) is running in a sandbox, the subagent CLI binary may n
 
 - **Claude Code:** Set `dangerouslyDisableSandbox: true` on the Bash tool call that runs the `claude -p` command. This lets the invocation run on the host while the subagent Claude Code process manages its own sandbox.
 
-- **Codex CLI:** Codex exec runs on the host by default. If the parent agent is inside a workspace sandbox, run the `codex exec` command on the host outside the sandbox boundary.
-
-- **Gemini CLI:** If the parent agent is inside a Seatbelt or Docker sandbox, invoke the `gemini` command outside that sandbox. The `--sandbox` flag on the Gemini invocation ensures the subagent itself runs sandboxed.
+- **Codex CLI / Gemini CLI:** The specific mechanism to escape the parent sandbox depends on your own agent's tooling. For example, Claude Code agents use `dangerouslyDisableSandbox: true` on the Bash tool call; other agents should use their equivalent sandbox-bypass mechanism. The `--full-auto` flag (Codex) and `--sandbox` flag (Gemini) ensure the subagent itself runs sandboxed regardless.
 
 **Key principle:** Only the invocation escapes the parent's sandbox. The subagent process runs with its own sandboxing and permission model.
 
@@ -122,7 +120,7 @@ Run the subagent in the background when your tooling supports it. This lets you 
 
 - **Claude Code:** Use the `run_in_background` parameter on the Bash tool call. You will be notified when the command completes.
 
-- **Codex CLI / Gemini CLI:** If your agent does not have a native background execution mechanism, append `&` to the command and use `wait` to collect the result later, or simply run in the foreground.
+- **Codex CLI / Gemini CLI:** If your agent does not have a native background execution mechanism, redirect output to a temporary file and run in the background (e.g., `codex exec --full-auto "task" > /tmp/subagent-output.txt 2>&1 &`), then use `wait` and read the file when done. Alternatively, simply run in the foreground.
 
 **Parallel execution example:** You can invoke two different agents simultaneously to get independent perspectives, then compare their outputs when both complete.
 
