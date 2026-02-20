@@ -1,4 +1,4 @@
-# Gemini CLI Quick Reference
+# Gemini CLI Reference
 
 Non-interactive usage reference for Google's Gemini CLI when invoking it as an external subagent.
 
@@ -20,7 +20,7 @@ Gemini operates on the current working directory by default.
 | `--sandbox` / `-s` | Enable sandboxed execution. Runs commands in an isolated environment (Docker on Linux, Seatbelt on macOS). |
 | `--model <model>` / `-m <model>` | Override the model. Accepts full names (`gemini-2.5-pro`, `gemini-2.5-flash`) or aliases (`auto`, `pro`, `flash`, `flash-lite`). |
 | `--output-format <fmt>` | Output format. Values: `text` (default), `json`, `stream-json`. |
-| `--yolo` / `-y` | Auto-approve all actions. **Deprecated** -- use `--approval-mode yolo` instead. |
+| `--yolo` / `-y` | Auto-approve all actions. Shorthand for `--approval-mode yolo`. |
 | `--all-files` / `-a` | Include all files in the working directory as context. |
 | `--include-directories <list>` | Comma-separated list of additional directories to include as context. |
 | `--resume <id>` / `-r <id>` | Resume a previous session by its ID. |

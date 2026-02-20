@@ -1,4 +1,4 @@
-# Codex CLI Reference (Non-Interactive Mode)
+# Codex CLI Reference
 
 Quick reference for invoking OpenAI's Codex CLI as an external subagent.
 
@@ -18,16 +18,14 @@ prints the final output to stdout.
 | Flag | Short | Description |
 |------|-------|-------------|
 | `--full-auto` | | Workspace-write sandbox with on-request approval policy. Recommended default for subagent use. |
-| `--yolo` | | Alias for `--dangerously-bypass-approvals-and-sandbox`. Bypasses all approvals and sandboxing. Use with caution. |
-| `--dangerously-bypass-approvals-and-sandbox` | | Disables all approval prompts and sandbox restrictions. Equivalent to `--yolo`. |
+| `--dangerously-bypass-approvals-and-sandbox` | | Disables all approval prompts and sandbox restrictions. Use with caution. |
 | `--model <model>` | `-m` | Override the model. Examples: `o4-mini`, `o3`, `codex-mini-latest`. |
 | `--json` | | Output newline-delimited JSON instead of plain text. Each line is a JSON object representing an event. |
 | `--output-last-message <path>` | `-o` | Write the final assistant message to the specified file path. |
 | `--cd <path>` | `-C` | Set the working directory for the Codex session. Defaults to the current directory. |
 | `--sandbox <mode>` | `-s` | Sandbox mode: `read-only`, `workspace-write`, or `danger-full-access`. |
-| `--ask-for-approval <policy>` | `-a` | Approval policy: `untrusted` (ask for everything), `on-request` (auto-approve reads/writes, ask for commands), `never` (auto-approve all). |
 | `--skip-git-repo-check` | | Allow running outside a git repository. By default Codex requires a git repo. |
-| `--ephemeral` | | Do not persist the session. The conversation is discarded after execution. |
+| `--add-dir <path>` | | Additional directory that should be writable alongside the primary workspace. |
 
 ### Convenience Flag Details
 
@@ -37,14 +35,8 @@ prints the final output to stdout.
 --sandbox workspace-write --ask-for-approval on-request
 ```
 
-`--yolo` is equivalent to:
-
-```
---sandbox danger-full-access --ask-for-approval never
-```
-
 For subagent use, prefer `--full-auto` unless the task specifically requires
-unrestricted host access.
+unrestricted host access (use `--dangerously-bypass-approvals-and-sandbox` for that).
 
 ## Stdin Piping
 
@@ -105,7 +97,6 @@ codex exec --full-auto \
 ```bash
 codex exec \
   --sandbox read-only \
-  --ask-for-approval untrusted \
   "Analyze the architecture of this project. Identify the main modules, \
   their responsibilities, and how they interact. Do not modify any files."
 ```

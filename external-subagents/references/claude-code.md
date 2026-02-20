@@ -20,7 +20,8 @@ The `-p` flag runs Claude Code in non-interactive mode: it processes the prompt,
 | `--max-turns <n>` | Limit the number of agentic turns (tool-use rounds). Prevents runaway loops. |
 | `--max-budget-usd <n>` | Cap total spend in USD for this invocation. The process stops when the budget is exhausted. |
 | `--tools <list>` | Restrict which tools the subagent can use. Comma-separated list, e.g. `"Read,Grep,Glob"` for read-only analysis. |
-| `--allowedTools <list>` | Auto-approve specific tools without prompting. Comma-separated list. |
+| `--allowedTools <list>` | Whitelist of tools to make available. Comma or space-separated. Supports patterns (e.g., `Bash(git:*)`). |
+| `--disallowedTools <list>` | Deny specific tools. Comma or space-separated. Tools in this list are blocked entirely. |
 | `--add-dir <path>` | Add an additional working directory the subagent can access. Can be specified multiple times. |
 | `--append-system-prompt "text"` | Append text to the system prompt. Use this to inject instructions or constraints. |
 | `--append-system-prompt-file <path>` | Append the contents of a file to the system prompt. Useful for injecting skill files or guidelines. |
