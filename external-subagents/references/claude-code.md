@@ -14,7 +14,7 @@ The `-p` flag runs Claude Code in non-interactive mode: it processes the prompt,
 
 | Flag | Description |
 |---|---|
-| `--dangerously-skip-permissions` | Skip all permission prompts. The subagent runs with full tool access inside its own sandbox. Required for unattended execution. |
+| `--settings '<json>'` | Pass inline settings JSON. Use `'{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}'` to run sandboxed with auto-approved bash commands. **Recommended for subagent use.** |
 | `--model <name>` | Override the model. Accepts short names (`sonnet`, `opus`, `haiku`) or full model IDs (`claude-sonnet-4-20250514`). |
 | `--output-format <fmt>` | Output format: `text` (default), `json`, or `stream-json`. Use `json` when you need to parse the response programmatically. |
 | `--max-turns <n>` | Limit the number of agentic turns (tool-use rounds). Prevents runaway loops. |
@@ -52,34 +52,34 @@ Stdin content is prepended to the prompt as context. This is useful for feeding 
 
 When the parent agent is running inside a sandbox (e.g. Claude Code's own sandbox), the `claude` binary may not be accessible or executable from within the sandbox. To invoke `claude -p` from a sandboxed parent agent:
 
-**Set `dangerouslyDisableSandbox: true` on the Bash tool call** that runs the `claude -p` command. This allows the invocation to run on the host. The child Claude Code process manages its own sandbox independently -- it still runs sandboxed with `--dangerously-skip-permissions` granting full tool access within that sandbox.
+**Set `dangerouslyDisableSandbox: true` on the Bash tool call** that runs the `claude -p` command. This allows the invocation to run on the host. The child Claude Code process manages its own sandbox independently via the `--settings` sandbox configuration.
 
 ```json
 {
-  "command": "claude -p \"Review src/auth.py for security issues.\" --dangerously-skip-permissions",
+  "command": "claude --settings '{\"sandbox\":{\"enabled\":true,\"autoAllowBashIfSandboxed\":true}}' -p \"Review src/auth.py for security issues.\"",
   "dangerouslyDisableSandbox": true
 }
 ```
 
-Only the invocation escapes the parent sandbox. The subagent process is sandboxed by its own runtime.
+Only the invocation escapes the parent sandbox. The subagent process runs inside its own sandbox with auto-approved bash commands.
 
 ## Example Invocations
 
 ### Basic code review
 
 ```bash
-claude -p "Review the code in src/handlers/ for error handling issues. \
-List each issue with file path and line number." \
-  --dangerously-skip-permissions
+claude --settings '{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}' \
+  -p "Review the code in src/handlers/ for error handling issues. \
+List each issue with file path and line number."
 ```
 
 ### Read-only analysis with tool restrictions
 
 ```bash
-claude -p "Analyze the architecture of this project. \
+claude --settings '{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}' \
+  -p "Analyze the architecture of this project. \
 Identify the main modules and their dependencies. \
 Do not modify any files." \
-  --dangerously-skip-permissions \
   --tools "Read,Grep,Glob,Bash" \
   --max-turns 20
 ```
@@ -87,9 +87,9 @@ Do not modify any files." \
 ### With budget cap
 
 ```bash
-claude -p "Refactor the database layer in src/db/ to use connection pooling. \
+claude --settings '{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}' \
+  -p "Refactor the database layer in src/db/ to use connection pooling. \
 Write tests for the changes." \
-  --dangerously-skip-permissions \
   --max-budget-usd 1.00 \
   --no-session-persistence
 ```
@@ -97,15 +97,15 @@ Write tests for the changes." \
 ### JSON output for programmatic parsing
 
 ```bash
-claude -p "List all TODO comments in the codebase as a JSON array." \
-  --dangerously-skip-permissions \
+claude --settings '{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}' \
+  -p "List all TODO comments in the codebase as a JSON array." \
   --output-format json
 ```
 
 ### Injecting context via system prompt file
 
 ```bash
-claude -p "Review this PR for issues." \
-  --dangerously-skip-permissions \
+claude --settings '{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}' \
+  -p "Review this PR for issues." \
   --append-system-prompt-file /path/to/review-guidelines.md
 ```

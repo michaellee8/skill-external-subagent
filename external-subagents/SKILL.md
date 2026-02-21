@@ -1,15 +1,7 @@
 ---
 name: external-subagents
-description: >-
-  Use when the user explicitly asks to invoke another coding agent CLI as a
-  subagent. Triggers include phrases like "get a second opinion from Codex",
-  "have Gemini review this", "run this through Claude Code", "ask another
-  agent", or "use a different model for this". Supports Claude Code, Codex CLI,
-  and Gemini CLI. Never invoke autonomously.
-compatibility: >-
-  Requires shell/command execution access. The agent must be able to run CLI
-  commands. If the agent is sandboxed, it must have a mechanism to execute
-  commands outside the sandbox (e.g. dangerouslyDisableSandbox in Claude Code).
+description: "Use when the user explicitly asks to invoke another coding agent CLI as a subagent. Triggers include phrases like 'get a second opinion from Codex', 'have Gemini review this', 'run this through Claude Code', 'ask another agent', or 'use a different model for this'. Supports Claude Code, Codex CLI, and Gemini CLI. Never invoke autonomously."
+compatibility: "Requires shell/command execution access. The agent must be able to run CLI commands. If the agent is sandboxed, it must have a mechanism to execute commands outside the sandbox."
 ---
 
 # External Subagents
@@ -35,6 +27,7 @@ This skill teaches agents how to invoke other coding agent CLIs (Claude Code, Co
 - The task is something you can do yourself and the user has not requested delegation
 - The user asks you to "think harder" or "try again" -- that is about your own reasoning, not delegation
 - No supported CLI is installed on the system
+- You are already the agent mentioned by the user. For example, if you are Claude, and the user requested to perform review using a Claude subagent, you should use your own tool to create subagents instead of invoking another Claude instance using Bash.
 
 ## Core Flow
 
@@ -59,8 +52,8 @@ This skill teaches agents how to invoke other coding agent CLIs (Claude Code, Co
 ### Claude Code
 
 ```bash
-claude -p "Your task description here." \
-  --dangerously-skip-permissions
+claude --settings '{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}' \
+  -p "Your task description here."
 ```
 
 ### Codex CLI
@@ -77,6 +70,7 @@ gemini -p "Your task description here." \
 ```
 
 **Notes:**
+
 - All three CLIs output plain text to stdout by default.
 - No `--model` flag is included -- let each CLI use its default model.
 - The prompt string should contain the full task description, relevant file paths, and any instructions for the subagent.
@@ -88,9 +82,9 @@ If the parent agent (you) is running in a sandbox, the subagent CLI binary may n
 
 **Per-agent mechanisms:**
 
-- **Claude Code:** Set `dangerouslyDisableSandbox: true` on the Bash tool call that runs the `claude -p` command. This lets the invocation run on the host while the subagent Claude Code process manages its own sandbox.
+- **Claude Code as parent:** Set `dangerouslyDisableSandbox: true` on the Bash tool call that runs the subagent command. This lets the invocation run on the host. The subagent CLI then manages its own sandbox independently.
 
-- **Codex CLI / Gemini CLI:** The specific mechanism to escape the parent sandbox depends on your own agent's tooling. For example, Claude Code agents use `dangerouslyDisableSandbox: true` on the Bash tool call; other agents should use their equivalent sandbox-bypass mechanism. The `--full-auto` flag (Codex) and `--sandbox` flag (Gemini) ensure the subagent itself runs sandboxed regardless.
+- **Other agents as parent:** Use your agent's equivalent sandbox-bypass mechanism for the invocation command only. The `--settings` sandbox flag (Claude Code), `--full-auto` flag (Codex), and `--sandbox` flag (Gemini) ensure the subagent itself runs sandboxed regardless.
 
 **Key principle:** Only the invocation escapes the parent's sandbox. The subagent process runs with its own sandboxing and permission model.
 
@@ -107,11 +101,11 @@ Enrich the subagent's prompt with relevant context so it can do useful work:
 **Example prompt with skill and file references:**
 
 ```bash
-claude -p "Review the authentication logic in /home/user/project/src/auth.py \
+claude --settings '{"sandbox":{"enabled":true,"autoAllowBashIfSandboxed":true}}' \
+  -p "Review the authentication logic in /home/user/project/src/auth.py \
 for security vulnerabilities. Before starting, read the skill file at \
 /home/user/.claude/skills/security-review/SKILL.md and follow its guidelines. \
-Focus on input validation and session management." \
-  --dangerously-skip-permissions
+Focus on input validation and session management."
 ```
 
 ## Background Execution
