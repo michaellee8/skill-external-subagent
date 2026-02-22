@@ -27,11 +27,11 @@ This skill teaches agents how to invoke other coding agent CLIs (Claude Code, Co
 - The task is something you can do yourself and the user has not requested delegation
 - The user asks you to "think harder" or "try again" -- that is about your own reasoning, not delegation
 - No supported CLI is installed on the system
-- You are already the agent mentioned by the user. For example, if you are Claude, and the user requested to perform review using a Claude subagent, you should use your own tool to create subagents instead of invoking another Claude instance using Bash.
+- You are already the agent mentioned by the user. For example, if you are Claude Code, and the user requested to perform review using claude, you should use your own Task tool to create subagents instead of invoking another Claude instance using Bash. If you are Claude Code or Claude, you MUST not launch `claude`. If you are Codex or Codex CLI, you MUST not launch `codex`. If you are Gemini or Gemini CLI, you MUST not launch `gemini`.
 
 ## Core Flow
 
-1. **Detect available CLIs.** Run `which claude codex gemini` (or check each individually) to see which agent CLIs are installed. Each line of output corresponds to a found binary. If none are found, inform the user and stop.
+1. **Detect available CLIs.** Run `which claude codex gemini` (or check each individually) to see which agent CLIs are installed. Each line of output corresponds to a found binary. If none are found, inform the user and stop. This command must be ran on host, running inside sandbox will not work.
 
 2. **Select the tool.** If the user specified which agent to use, use that one. If they said something generic like "get a second opinion", suggest from the available CLIs and confirm with the user, or pick one if only one is available.
 
